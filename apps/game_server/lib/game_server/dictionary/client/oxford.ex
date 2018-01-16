@@ -1,3 +1,5 @@
+require Logger
+
 defmodule GameServer.Dictionary.Client.Oxford do
   @moduledoc """
   Dictionary API client for Oxford Dictionaries.
@@ -26,8 +28,11 @@ defmodule GameServer.Dictionary.Client.Oxford do
         case response do
           %HTTPoison.Response{body: body, status_code: 200} ->
             Poison.decode(body)
-          _ ->
+          %HTTPoison.Response{status_code: 404} ->
             {:error, :not_found}
+          res ->
+            Logger.debug(inspect(res))
+            {:error, :api_error}
         end
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}

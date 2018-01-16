@@ -34,5 +34,7 @@ config :game_server,
   dictionary_app_id: System.get_env("DICT_APP_ID"),
   dictionary_app_key: System.get_env("DICT_APP_KEY")
 
+config :logger,
+  backends: [:console]
 
 import_config "#{Mix.env}.exs"

@@ -20,7 +20,8 @@ defmodule GameServer.PlayerTest do
     Player.ready(player)
     assert Player.status(player) == :ready
 
-    Player.start_game(player)
+    {:ok, game} = start_supervised(GameServer.Game)
+    Player.start_game(player, game)
     assert Player.status(player) == :in_game
 
     Player.finish_game(player)
@@ -34,5 +35,14 @@ defmodule GameServer.PlayerTest do
 
   test "should not be restarted" do
     assert Supervisor.child_spec(Player, []).restart == :temporary
+  end
+
+  describe "#start_game(player, game)" do
+    test "remembers game", %{player: player} do
+      {:ok, game} = start_supervised(GameServer.Game)
+      Player.start_game(player, game)
+
+      assert Player.game(player) == game
+    end
   end
 end
