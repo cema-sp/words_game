@@ -33,15 +33,63 @@ defmodule GameServer.LoungeTest do
     assert map_size(Lounge.ready_players(lounge)) == 1
   end
 
-  test "allows player to create a training game", %{lounge: lounge} do
-    assert player_uuid = Lounge.join(lounge, "NAME")
+  describe "when a player joined" do
+    setup :join_player
 
-    assert Lounge.all_games(lounge) == %{}
+    test "allows player to start a training game", context do
+      %{lounge: lounge, player: player, player_uuid: player_uuid} = context
 
-    assert uuid = Lounge.new_game(lounge, :training, player_uuid)
+      assert lounge |> Lounge.all_games() |> map_size() == 0
 
-    assert %{^uuid => game_pid} = Lounge.all_games(lounge)
+      assert uuid = Lounge.new_game(lounge, :training, player_uuid)
 
-    assert game_pid |> GameServer.Game.players |> Enum.count() == 1
+      assert %{^uuid => game} = Lounge.all_games(lounge)
+
+      assert game |> GameServer.Game.players() |> Enum.count() == 1
+      assert GameServer.Game.status(game) == :started
+      assert GameServer.Game.type(game) == :training
+      assert GameServer.Player.status(player) == :in_game
+      assert GameServer.Player.game(player) == game
+    end
+  end
+
+  describe "when a player started a training game" do
+    setup [:join_player, :start_training_game]
+
+    test "allows player to quit a training game", context do
+      %{
+        lounge: lounge,
+        player: player,
+        player_uuid: player_uuid,
+        game_uuid: game_uuid,
+        game: game
+      } = context
+
+      assert ^game_uuid = Lounge.quit_game(lounge, player_uuid)
+
+      assert lounge |> Lounge.all_games() |> map_size() == 0
+
+      assert GameServer.Game.status(game) == :finished
+      assert GameServer.Player.status(player) == :idle
+      assert GameServer.Player.game(player) == nil
+    end
+  end
+
+  defp join_player(context) do
+    %{lounge: lounge} = context
+
+    player_uuid = Lounge.join(lounge, "NAME")
+    %{^player_uuid => player} = Lounge.all_players(lounge)
+
+    [player_uuid: player_uuid, player: player]
+  end
+
+  defp start_training_game(context) do
+    %{lounge: lounge, player_uuid: player_uuid} = context
+
+    game_uuid = Lounge.new_game(lounge, :training, player_uuid)
+    %{^game_uuid => game} = Lounge.all_games(lounge)
+
+    [game_uuid: game_uuid, game: game]
   end
 end

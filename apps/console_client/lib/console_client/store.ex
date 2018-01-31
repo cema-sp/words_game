@@ -1,28 +1,55 @@
 defmodule ConsoleClient.Store do
   use Agent
 
-  # defmodule State do
-  #   defstruct [:name, :uuid, connected: false]
-  # end
+  @initial_state %{
+    name: nil,
+    uuid: nil,
+    connected: false,
+    turn: false,
+    letters: [],
+    score: 0
+  }
 
-  @initial_state %{name: nil, uuid: nil, connected: false}
-
-  def start_link(), do: start_link([])
+  def start_link, do: start_link([])
 
   def start_link(_) do
     Agent.start_link(fn -> @initial_state end, name: __MODULE__)
   end
 
-  def connected?() do
+  def connected? do
     Agent.get(__MODULE__, Map, :get, [:connected])
   end
 
-  def name() do
+  def my_turn? do
+    Agent.get(__MODULE__, Map, :get, [:turn])
+  end
+
+  def name do
     Agent.get(__MODULE__, Map, :get, [:name])
   end
 
-  def uuid() do
+  def uuid do
     Agent.get(__MODULE__, Map, :get, [:uuid])
+  end
+
+  def letters do
+    Agent.get(__MODULE__, Map, :get, [:letters])
+  end
+
+  def score do
+    Agent.get(__MODULE__, Map, :get, [:score])
+  end
+
+  def set_letters(letters) do
+    Agent.update(__MODULE__, Map, :put, [:letters, letters])
+  end
+
+  def set_score(score) do
+    Agent.update(__MODULE__, Map, :put, [:score, score])
+  end
+
+  def my_turn(turn) do
+    Agent.update(__MODULE__, Map, :put, [:turn, turn])
   end
 
   def connected(name, uuid) do
@@ -31,7 +58,7 @@ defmodule ConsoleClient.Store do
     end)
   end
 
-  def disconnected() do
+  def disconnected do
     Agent.update(__MODULE__, fn state ->
       %{state | connected: false, name: nil, uuid: nil}
     end)

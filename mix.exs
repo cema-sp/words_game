@@ -15,9 +15,6 @@ defmodule WordsGame.Mixfile do
   #
   # Run "mix help deps" for examples and options.
   defp deps do
-    [
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
-      {:dogma, "~> 0.1", only: :dev}
-    ]
+    []
   end
 end

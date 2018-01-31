@@ -8,9 +8,16 @@ defmodule GameServer.Dictionary do
   @allowed_categories ["Verb", "Noun", "Adjective"]
   @client Application.get_env(:game_server, :dictionary_client)
 
+  @type check_word_error :: :denied_category
+                          | :not_found
+                          | :api_error
+                          | :unknown
+                          | term
   @doc """
   Checks if `word` exists in the dictionary and if it is of allowed category.
   """
+  @spec check_word(String.t) :: {:ok, String.t}
+                              | {:error, check_word_error }
   def check_word(word) do
     with {:ok, data} <- @client.lexical_category(word) do
       if allowed_category?(data) do

@@ -2,6 +2,7 @@ defmodule ConsoleClient.Command do
   @moduledoc false
 
   alias ConsoleClient.Store
+  alias GameServer.Lounge
 
   @doc ~S"""
   Parses a `line` into a command (Tuple).
@@ -28,6 +29,11 @@ defmodule ConsoleClient.Command do
       iex> ConsoleClient.Command.parse(":hello")
       {:error, :unknown_command}
 
+  Await word only when it is my turn
+
+      iex> ConsoleClient.Command.parse("cat")
+      {:ok, {:word, "cat"}}
+
   """
   def parse(""), do: {:ok, :no_command}
 
@@ -38,30 +44,66 @@ defmodule ConsoleClient.Command do
       [":new", "training"] -> {:ok, {:new_game, :training}}
       [":finish"] -> {:ok, {:finish_game}}
       [":quit"] -> {:ok, {:quit}}
+      [":" <> _ | _] -> {:error, :unknown_command}
+      [word] -> {:ok, {:word, word}}
       _ -> {:error, :unknown_command}
     end
   end
 
   def run({:connect, name}) do
-    uuid = GameServer.Lounge.join(GameServer.Lounge, name)
-    Store.connected(name, uuid)
+    player_uuid = Lounge.join(Lounge, name)
+    Store.connected(name, player_uuid)
+
     {:ok, "connected"}
   end
 
   def run({:new_game, :training}) do
-    uuid = Store.uuid()
-    _uuid = GameServer.Lounge.new_game(GameServer.Lounge, :training, uuid)
+    player_uuid = Store.uuid()
+    {_game_uuid, letters} = Lounge.new_game(Lounge, :training, player_uuid)
+
+    Store.set_letters(letters)
+    Store.my_turn(true)
+
     {:ok, "a new training game created"}
   end
 
+  def run({:word, word}) do
+    if Store.my_turn?() do
+      player_uuid = Store.uuid()
+      case Lounge.word(Lounge, player_uuid, word) do
+        {:ok, :miss} ->
+          {:ok, "#{inspect(word)} doesn't work, sorry"}
+
+        {:ok, score} ->
+          Store.set_score(score)
+          {:ok, "you have scored!"}
+
+        {:error, error} ->
+          {:error, error}
+      end
+    else
+      {:error, "it is not your turn"}
+    end
+  end
+
+  def run({:finish_game}) do
+    player_uuid = Store.uuid()
+    _game_uuid = Lounge.quit_game(Lounge, player_uuid)
+
+    {:ok, "game finished"}
+  end
+
   def run({:disconnect}) do
-    # uuid = GameServer.Lounge.join(GameServer.Lounge, name)
+    # Lounge.quit(Lounge, player_uuid)
     Store.disconnected()
+
     {:ok, "disconnected"}
   end
 
   def run({:quit}) do
-    # disconnect & finish game
+    {:ok, _} = run({:finish_game})
+    {:ok, _} = run({:disconnect})
+
     :quit
   end
 

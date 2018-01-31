@@ -31,18 +31,10 @@ defmodule GameServer.GameTest do
       assert Game.status(game) == :started
     end
 
-    test "changes players status to :in_game", %{game: game} do
-      {:ok, player} = start_supervised(GameServer.Player)
-      Game.join(game, player)
-
-      prev_status = GameServer.Player.status(player)
+    test "generates letters for the game", %{game: game} do
+      assert game |> Game.letters() |> Enum.empty?
       Game.start(game)
-
-      new_status = GameServer.Player.status(player)
-
-      assert new_status != prev_status
-      assert new_status == :in_game
-      assert GameServer.Player.game(player) == game
+      refute game |> Game.letters() |> Enum.empty?
     end
   end
 
@@ -52,19 +44,10 @@ defmodule GameServer.GameTest do
       assert Game.status(game) == :finished
     end
 
-    test "changes players status to :in_game", %{game: game} do
-      {:ok, player} = start_supervised(GameServer.Player)
-      Game.join(game, player)
-      Game.start(game)
-
-      prev_status = GameServer.Player.status(player)
-      Game.finish(game)
-
-      new_status = GameServer.Player.status(player)
-
-      assert new_status != prev_status
-      assert new_status == :idle
-      assert GameServer.Player.game(player) == nil
-    end
+    # test "stops the Agent", %{game: game} do
+    #   assert Process.alive?(game)
+    #   Game.finish(game)
+    #   refute Process.alive?(game)
+    # end
   end
 end

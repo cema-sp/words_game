@@ -27,7 +27,9 @@ defmodule GameServer.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 1.0.0"},
-      {:poison, "~> 3.1.0"}
+      {:poison, "~> 3.1.0"},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:dogma, "~> 0.1", only: :dev}
     ]
   end
 end

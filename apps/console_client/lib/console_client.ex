@@ -4,21 +4,21 @@ defmodule ConsoleClient do
   alias ConsoleClient.Command
   alias ConsoleClient.Store
 
-  def run() do
+  def run do
     init()
     IO.puts "Welcome to the Words Game"
     loop()
   end
 
-  defp init() do
+  defp init do
     Store.start_link()
   end
 
-  def loop() do
+  def loop do
     # IO.ANSI.clear() |> IO.puts()
     IO.puts(status())
 
-    line = IO.gets("> ") |> String.trim()
+    line = "> " |> IO.gets() |> String.trim()
 
     case Command.parse(line) do
       {:ok, :no_command} ->
@@ -37,16 +37,26 @@ defmodule ConsoleClient do
           :quit ->
             IO.puts("< BYE BYE")
         end
+
       {:error, :unknown_command} ->
         IO.puts("< ERROR: unknown command")
         loop()
     end
   end
 
-  defp status() do
-    connection_status = if Store.connected?(), do: "connected", else: "disconnect"
+  defp status do
+    connection_status =
+      if Store.connected?(), do: "connected", else: "disconnect"
+
     name = Store.name() || "<no name>"
 
-    "[#{connection_status}] [#{name}]"
+    letters =
+      Store.letters() |> to_string()
+
+    letters = if letters == "", do: "-", else: letters
+
+    score = Store.score()
+
+    "[#{connection_status}] [#{name}] [letters: #{letters}] [score: #{score}]"
   end
 end
