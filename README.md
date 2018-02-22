@@ -6,7 +6,7 @@
   - [ ] Training Games
     - [x] Start game
     - [x] Generate letters
-    - [ ] Ask player for word
+    - [x] Ask player for word
     - [x] Evaluate answer and assign score
     - [ ] Deny already used words
     - [ ] Finish game

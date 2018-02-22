@@ -1,3 +1,5 @@
+require Logger
+
 defmodule GameServer.Game do
   @moduledoc false
 
@@ -54,6 +56,27 @@ defmodule GameServer.Game do
 
   def score(game, player) do
     player(game, player).score
+  end
+
+  def stats(game) do
+    players = players(game)
+
+    do_stats(players)
+  end
+
+  defp do_stats([]), do: nil
+
+  defp do_stats(players) do
+    scores =
+      Enum.reduce(players, %{}, fn(%{pid: player, score: score}, acc) ->
+        name = GameServer.Player.name(player)
+        Map.put(acc, player, %{name: name, score: score})
+      end)
+
+    leader = leader(players)
+    leader = Map.put(leader, :name, GameServer.Player.name(leader.pid))
+
+    %{scores: scores, leader: leader}
   end
 
   def update_score(game, player, scored) do
@@ -119,7 +142,8 @@ defmodule GameServer.Game do
       %{state | status: :finished}
     end)
 
-    log_score(game)
+    stats = stats(game)
+    log_stats(stats)
     # Agent.stop(game)
   end
 
@@ -146,15 +170,32 @@ defmodule GameServer.Game do
     String.length(word)
   end
 
-  defp log_score(game) do
+  defp log_stats(stats) when is_nil(stats), do: :ok
+
+  defp log_stats(%{scores: scores, leader: leader}) do
     score_lines =
-      game
-      |> players()
-      |> Enum.map(fn %{pid: player, score: score} ->
-        name = GameServer.Player.name(player)
-        "\n#{name}: #{score}"
+      scores
+      |> Map.values()
+      |> Enum.map(fn %{name: name, score: score} ->
+        "  #{name} - #{score}"
       end)
 
-    ["Score:" | score_lines] |> Enum.join("\n")
+    leader_line = "  #{leader.name} with #{leader.score}"
+
+    message =
+      ~s"""
+      Leader:
+      #{leader_line}
+      Scores:
+      #{Enum.join(score_lines, "\n")}
+      """
+
+    Logger.info(message)
+  end
+
+  defp leader([]), do: nil
+
+  defp leader(players) do
+    Enum.max_by(players, &(&1.score))
   end
 end

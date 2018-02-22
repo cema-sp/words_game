@@ -50,4 +50,19 @@ defmodule GameServer.GameTest do
     #   refute Process.alive?(game)
     # end
   end
+
+  describe "#stats/1" do
+    test "returns game stats", %{game: game} do
+      {:ok, player} = start_supervised(GameServer.Player)
+
+      Game.join(game, player)
+
+      stats = Game.stats(game)
+
+      assert is_map(stats)
+      assert %{scores: scores, leader: leader} = stats
+      assert %{^player => _} = scores
+      assert %{pid: ^player, score: _} = leader
+    end
+  end
 end

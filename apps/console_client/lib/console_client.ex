@@ -57,6 +57,23 @@ defmodule ConsoleClient do
 
     score = Store.score()
 
-    "[#{connection_status}] [#{name}] [letters: #{letters}] [score: #{score}]"
+    turn =
+      if Store.connected?() do
+        if Store.my_turn?(), do: "Your turn!", else: "Waiting for another palyer"
+      else
+        "-"
+      end
+
+    sections = [
+      connection_status,
+      name,
+      "letters: #{letters}",
+      "score: #{score}",
+      turn
+    ]
+
+    sections
+    |> Enum.map(&("[#{&1}]"))
+    |> Enum.join(" ")
   end
 end

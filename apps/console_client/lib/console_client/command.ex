@@ -78,6 +78,9 @@ defmodule ConsoleClient.Command do
           Store.set_score(score)
           {:ok, "you have scored!"}
 
+        {:error, :denied_letters} ->
+          {:ok, "Please use only provided letters"}
+
         {:error, error} ->
           {:error, error}
       end
