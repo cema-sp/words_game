@@ -65,4 +65,41 @@ defmodule GameServer.GameTest do
       assert %{pid: ^player, score: _} = leader
     end
   end
+
+  describe "word/3" do
+    setup [:join_player, :join_another_player, :start_game]
+
+    test "when it's not players turn returns error", context do
+      %{game: game, another_player: another_player} = context
+      assert {:error, :not_your_turn} = Game.word(game, another_player, "cat")
+    end
+
+    test "when wrong letters used returns error", context do
+      %{game: game, player: player} = context
+      assert {:error, :denied_letters} = Game.word(game, player, "c@t")
+    end
+  end
+
+  defp start_game(%{game: game}), do: Game.start(game)
+
+  defp join_player(%{game: game}) do
+    {:ok, player} = start_supervised(GameServer.Player)
+
+    :ok = Game.join(game, player)
+
+    [player: player]
+  end
+
+  defp join_another_player(%{game: game}) do
+    player_spec = %{
+      id: AnotherPlayer,
+      start: {GameServer.Player, :start_link, [[]]}
+    }
+
+    {:ok, player} = start_supervised(player_spec)
+
+    :ok = Game.join(game, player)
+
+    [another_player: player]
+  end
 end

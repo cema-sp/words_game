@@ -10,7 +10,8 @@
     - [x] Evaluate answer and assign score
     - [ ] Deny already used words
     - [ ] Finish game
-    - [ ] Log results
+    - [x] Log results
+  - [ ] Escript
 - [ ] Console Client
   - [x] Console loop
   - [x] Send commands to the server
