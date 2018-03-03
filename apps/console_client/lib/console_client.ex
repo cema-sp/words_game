@@ -1,20 +1,26 @@
 defmodule ConsoleClient do
   @moduledoc false
 
+  @default_server_host "127.0.0.1"
+
   alias ConsoleClient.Command
   alias ConsoleClient.Store
 
-  def run do
-    init()
+  def main(args \\ []) do
+    server_host = @default_server_host
+
+    init(server_host: server_host)
     IO.puts "Welcome to the Words Game"
     loop()
   end
 
-  defp init do
-    Store.start_link()
+  defp init(server_host: server_host) do
+    with {:ok, _store} <- Store.start_link() do
+      Store.set_server_host(server_host)
+    end
   end
 
-  def loop do
+  defp loop do
     IO.puts(IO.ANSI.green() <> status() <> IO.ANSI.default_color())
 
     line = "> " |> IO.gets() |> String.trim()

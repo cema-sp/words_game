@@ -1,21 +1,20 @@
 # ConsoleClient
+Command Line Client for Words Game
 
-**TODO: Add description**
+## Running
+### Running from IEx
 
-## Installation
+~~~
+iex -S mix
+> ConsoleClient.main()
+~~~
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `console_client` to your list of dependencies in `mix.exs`:
+### Running release
 
-```elixir
-def deps do
-  [
-    {:console_client, "~> 0.1.0"}
-  ]
-end
-```
+~~~
+_build/escript/client
+~~~
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/console_client](https://hexdocs.pm/console_client).
+## Releasing
 
+`mix escript.build`

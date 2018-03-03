@@ -2,6 +2,7 @@ defmodule ConsoleClient.Store do
   use Agent
 
   @initial_state %{
+    server_host: nil,
     name: nil,
     uuid: nil,
     connected: false,
@@ -24,6 +25,10 @@ defmodule ConsoleClient.Store do
     Agent.get(__MODULE__, Map, :get, [:turn])
   end
 
+  def server_host do
+    Agent.get(__MODULE__, Map, :get, [:server_host])
+  end
+
   def name do
     Agent.get(__MODULE__, Map, :get, [:name])
   end
@@ -38,6 +43,10 @@ defmodule ConsoleClient.Store do
 
   def score do
     Agent.get(__MODULE__, Map, :get, [:score])
+  end
+
+  def set_server_host(server_host) do
+    Agent.update(__MODULE__, Map, :put, [:server_host, server_host])
   end
 
   def set_letters(letters) do

@@ -2,7 +2,7 @@ defmodule ConsoleClient.Command do
   @moduledoc false
 
   alias ConsoleClient.Store
-  alias GameServer.Lounge
+  # alias GameServer.Lounge
 
   @doc ~S"""
   Parses a `line` into a command (Tuple).
@@ -51,18 +51,21 @@ defmodule ConsoleClient.Command do
   end
 
   def run({:connect, name}) do
-    player_uuid = Lounge.join(Lounge, name)
-    Store.connected(name, player_uuid)
+    server_host = Store.server_host()
+    # player_uuid = Lounge.join(Lounge, name)
+    # Store.connected(name, player_uuid)
 
-    {:ok, "connected"}
+    message = "connected to #{inspect(server_host)}"
+
+    {:ok, message}
   end
 
   def run({:new_game, :training}) do
     player_uuid = Store.uuid()
-    {_game_uuid, letters} = Lounge.new_game(Lounge, :training, player_uuid)
-
-    Store.set_letters(letters)
-    Store.my_turn(true)
+    # {_game_uuid, letters} = Lounge.new_game(Lounge, :training, player_uuid)
+    #
+    # Store.set_letters(letters)
+    # Store.my_turn(true)
 
     {:ok, "a new training game created"}
   end
@@ -70,23 +73,24 @@ defmodule ConsoleClient.Command do
   def run({:word, word}) do
     if Store.my_turn?() do
       player_uuid = Store.uuid()
-      case Lounge.word(Lounge, player_uuid, word) do
-        {:ok, :miss} ->
-          {:ok, "#{inspect(word)} doesn't work, sorry"}
-
-        {:ok, score} ->
-          Store.set_score(score)
-          {:ok, "you have scored!"}
-
-        {:error, :denied_letters} ->
-          {:ok, "Please use only provided letters"}
-
-        {:error, :already_used_word} ->
-          {:ok, "#{inspect(word)} has been already used"}
-
-        {:error, error} ->
-          {:error, error}
-      end
+      # case Lounge.word(Lounge, player_uuid, word) do
+      #   {:ok, :miss} ->
+      #     {:ok, "#{inspect(word)} doesn't work, sorry"}
+      #
+      #   {:ok, score} ->
+      #     Store.set_score(score)
+      #     {:ok, "you have scored!"}
+      #
+      #   {:error, :denied_letters} ->
+      #     {:ok, "Please use only provided letters"}
+      #
+      #   {:error, :already_used_word} ->
+      #     {:ok, "#{inspect(word)} has been already used"}
+      #
+      #   {:error, error} ->
+      #     {:error, error}
+      # end
+      {:error, "it is not your turn"}
     else
       {:error, "it is not your turn"}
     end
@@ -94,7 +98,7 @@ defmodule ConsoleClient.Command do
 
   def run({:finish_game}) do
     player_uuid = Store.uuid()
-    _game_uuid = Lounge.quit_game(Lounge, player_uuid)
+    # _game_uuid = Lounge.quit_game(Lounge, player_uuid)
 
     {:ok, "game finished"}
   end
