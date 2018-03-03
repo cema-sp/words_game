@@ -3,19 +3,19 @@
 ## MVP v1 Milestone
 
 - [ ] Game Server
-  - [ ] Training Games
+  - [x] Training Games
     - [x] Start game
     - [x] Generate letters
     - [x] Ask player for word
     - [x] Evaluate answer and assign score
-    - [ ] Deny already used words
-    - [ ] Finish game
+    - [x] Deny already used words
+    - [x] Finish game
     - [x] Log results
-  - [ ] Escript
+  - [ ] Release
 - [ ] Console Client
   - [x] Console loop
   - [x] Send commands to the server
-  - [ ] Escript
+  - [ ] Release
   - [ ] Server on another node (RPC?)
 
 ## MVP v2 Milestone

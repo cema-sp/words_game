@@ -1,6 +1,6 @@
 defmodule GameServer do
   @moduledoc """
-  Documentation for GameServer.
+  Words Game Server
   """
 
   @doc """

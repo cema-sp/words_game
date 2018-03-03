@@ -78,6 +78,40 @@ defmodule GameServer.GameTest do
       %{game: game, player: player} = context
       assert {:error, :denied_letters} = Game.word(game, player, "c@t")
     end
+
+    test "when word not found returns miss", context do
+      %{game: game, player: player} = context
+
+      Agent.update(game, fn state ->
+        %{state | letters: 'ntfound'}
+      end)
+
+      assert {:ok, :miss} = Game.word(game, player, "notfound")
+    end
+
+    test "when word found updates and returns score", context do
+      %{game: game, player: player} = context
+
+      Agent.update(game, fn state ->
+        %{state | letters: 'miws'}
+      end)
+
+      assert {:ok, score} = Game.word(game, player, "swim")
+      assert score == Game.score(game, player)
+      assert score == 4
+    end
+
+    test "when already used word provided returns error", context do
+      %{game: game, player: player} = context
+
+      Agent.update(game, fn state ->
+        %{state | letters: 'miws'}
+      end)
+
+      {:ok, _} = Game.word(game, player, "swim")
+
+      assert {:error, :already_used_word} = Game.word(game, player, "swim")
+    end
   end
 
   defp start_game(%{game: game}), do: Game.start(game)

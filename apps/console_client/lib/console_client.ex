@@ -15,8 +15,7 @@ defmodule ConsoleClient do
   end
 
   def loop do
-    # IO.ANSI.clear() |> IO.puts()
-    IO.puts(status())
+    IO.puts(IO.ANSI.green() <> status() <> IO.ANSI.default_color())
 
     line = "> " |> IO.gets() |> String.trim()
 

@@ -81,6 +81,9 @@ defmodule ConsoleClient.Command do
         {:error, :denied_letters} ->
           {:ok, "Please use only provided letters"}
 
+        {:error, :already_used_word} ->
+          {:ok, "#{inspect(word)} has been already used"}
+
         {:error, error} ->
           {:error, error}
       end

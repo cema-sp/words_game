@@ -17,12 +17,13 @@ defmodule GameServer.Game do
 
   def initial_state do
     %{
-      uuid:     generate_uuid(),
-      type:     nil,
-      status:   :pending,
-      letters:  [],
-      players:  [],
-      turn:     0
+      uuid:        generate_uuid(),
+      type:        nil,
+      status:      :pending,
+      letters:     [],
+      players:     [],
+      turn:        0,
+      used_words:  MapSet.new
     }
   end
 
@@ -44,6 +45,10 @@ defmodule GameServer.Game do
 
   def players(game) do
     Agent.get(game, Map, :get, [:players])
+  end
+
+  def used_words(game) do
+    Agent.get(game, Map, :get, [:used_words])
   end
 
   def player(game, player_pid) do
@@ -97,6 +102,10 @@ defmodule GameServer.Game do
     Agent.update(game, Map, :put, [:type, type])
   end
 
+  def use_word(game, word) do
+    Agent.update(game, Map, :update!, [:used_words, &(MapSet.put(&1, word))])
+  end
+
   def join(game, player) do
     Agent.update(game, fn state ->
       players = state.players ++ [%{pid: player, score: @initial_score}]
@@ -119,9 +128,13 @@ defmodule GameServer.Game do
       not allowed_letters?(game, word) ->
         {:error, :denied_letters}
 
+      used_word?(game, word) ->
+        {:error, :already_used_word}
+
       true ->
         case GameServer.Dictionary.check_word(word) do
           {:ok, word} ->
+            use_word(game, word)
             update_score(game, player, score_word(word))
             {:ok, score(game, player)}
 
@@ -166,6 +179,12 @@ defmodule GameServer.Game do
     Enum.empty?(exceeding_letters)
   end
 
+  defp used_word?(game, word) do
+    game
+    |> used_words()
+    |> MapSet.member?(word)
+  end
+
   defp score_word(word) do
     String.length(word)
   end
@@ -184,6 +203,7 @@ defmodule GameServer.Game do
 
     message =
       ~s"""
+
       Leader:
       #{leader_line}
       Scores:
