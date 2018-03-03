@@ -7,7 +7,8 @@ defmodule GameServer.Application do
     children = [
       GameServer.PlayerSupervisor,
       GameServer.GameSupervisor,
-      {GameServer.Lounge, name: GameServer.Lounge}
+      {GameServer.Lounge, name: GameServer.Lounge},
+      {GameServer.TCPServer, name: GameServer.TCPServer}
     ]
 
     opts = [strategy: :one_for_one, name: GameServer.Supervisor]
